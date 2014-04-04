@@ -21,3 +21,5 @@ Usage
 ----
 
 Run ufuzz with the -h option to see all command line options. When the tool runs, logs are written into the log directory.
+
+For basic fuzzing of all UPnP devices on the network, just run `ufuzz --upnp`.  You will probably also want to use the `-v 4` option to see the requests and response summaries.
