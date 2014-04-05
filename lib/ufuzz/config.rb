@@ -12,11 +12,12 @@ module UFuzz
         :connect_timeout  => 2,
         :read_timeout     => 10,
         :write_timeout    => 10,
+        :msearch_timeout  => 15,
         :non_block        => true,
         :nonblock         => true,
-        :chunk_size       => UFuzz::DEFAULT_CHUNK_SIZE,
-        :retry_limit      => UFuzz::DEFAULT_RETRY_LIMIT,
-        :traversal_match  => UFuzz::DEFAULT_TRAVERSAL_MATCH,
+        :chunk_size       => 1048576,
+        :retry_limit      => 2,
+        :traversal_match  => [ /root:/ ],
         :csrf_token_regex => nil,
         :detect_delay     => 5,
         :thread_count     => 1,
@@ -28,6 +29,7 @@ module UFuzz
             'User-Agent'    => 'Mozilla',
             'Referer'       => 'localhost'
           },
+        :tests            => [ 'buffer', 'integer', 'fmt', 'path', 'cmd', 'sqli', 'xxe' ],
       }
     end
     
@@ -76,7 +78,7 @@ module UFuzz
     end
     
     def create_testcase
-      test_set = @store.tests || [ 'buffer', 'integer', 'fmt', 'path', 'cmd', 'sqli', 'xxe' ]
+      test_set = @store.tests
 
       tests = test_set.map do |t|
         "UFuzz::#{t.camelize}Test".safe_constantize.new(:monitor => create_monitor)

@@ -6,7 +6,7 @@ module UPnP
 class Fuzzer < UFuzz::Http::Fuzzer
   def run
     @upnp = Request.new
-    @upnp.msearch
+    @upnp.msearch(@config.msearch_timeout)
     @upnp.enumerate
     
     request_count = @upnp.generate_requests.count
@@ -36,11 +36,13 @@ class Fuzzer < UFuzz::Http::Fuzzer
         @testcase.rewind('')
         while(@testcase.next?)
           fuzz = @testcase.next
-          temp_request = @request.to_s.gsub(param_id, fuzz.to_s)
-          temp_request = temp_request.gsub(/(\$PARAM_[0-9]+_\$)/, '1')
-          req = UFuzz::Http::Request.new(temp_request)
-          req.update_content_length
-          do_fuzz_case(req, 0, fuzz)
+          @config.encoders.each do |encoder|
+            encoded_fuzz = encoder.call(fuzz)
+            temp_request = @request.to_s.gsub(param_id, encoded_fuzz).gsub(/(\$PARAM_[0-9]+_\$)/, '1')
+            req = UFuzz::Http::Request.new(temp_request)
+            req.update_content_length
+            do_fuzz_case(req, 0, fuzz)
+          end
         end
       end
     end

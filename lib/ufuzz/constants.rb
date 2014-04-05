@@ -1,20 +1,10 @@
 module UFuzz
   HTTP_1_1 = " HTTP/1.1\r\n"
   CR_NL = "\r\n"
-  
-  DEFAULT_CHUNK_SIZE = 1048576 # 1 megabyte
-  
-  DEFAULT_TRAVERSAL_MATCH = [/root:/]
-  
+
   DEFAULT_NONBLOCK = OpenSSL::SSL::SSLSocket.public_method_defined?(:connect_nonblock) &&
       OpenSSL::SSL::SSLSocket.public_method_defined?(:read_nonblock) &&
       OpenSSL::SSL::SSLSocket.public_method_defined?(:write_nonblock)
-  
-  DEFAULT_RETRY_LIMIT = 2
-  
-  FORCE_ENC = CR_NL.respond_to?(:force_encoding)
-  
-  HTTP_VERBS = %w{connect delete get head options patch post put trace}
   
   NO_ENTITY = [204, 205, 304].freeze
   
@@ -72,5 +62,4 @@ module UFuzz
       module WaitWritable; end
     end
   end
-
 end
