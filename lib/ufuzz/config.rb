@@ -17,11 +17,17 @@ module UFuzz
         :chunk_size       => UFuzz::DEFAULT_CHUNK_SIZE,
         :retry_limit      => UFuzz::DEFAULT_RETRY_LIMIT,
         :traversal_match  => UFuzz::DEFAULT_TRAVERSAL_MATCH,
-        :extra_param      => 't',
-        :csrf_token_regex => /csrfmiddlewaretoken/,
+        :csrf_token_regex => nil,
         :detect_delay     => 5,
-        #:fuzz_encoding    => { :url => true },
-        :thread_count     => 1
+        :thread_count     => 1,
+        :encoders         => [ proc { |f| f.to_s }, proc { |f| f.to_s.urlenc } ],
+        :extra_param      => { 't' => '1' },
+        :fuzzable_headers => {
+            'Host'          => 'localhost',
+            'Cookie'        => '0',
+            'User-Agent'    => 'Mozilla',
+            'Referer'       => 'localhost'
+          },
       }
     end
     

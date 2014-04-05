@@ -15,7 +15,7 @@ class CmdTest < TestCase
   
   def test(content)
     delay = Time.now.to_f - @time
-    if content && content.to_s.length > 20 && delay > 5.0
+    if content && content.to_s.length > 20 && delay > Config.instance.detect_delay
       Fault.new('cmd injection', "possible cmd injection - #{@current.inspect}: delay #{delay}")
     else
       nil

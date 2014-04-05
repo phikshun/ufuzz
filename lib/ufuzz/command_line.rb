@@ -59,12 +59,6 @@ module Options
       opts.on('--reverse-log', 'Fuzz proxy log in reverse order') do
         options[:reverse_log] = true
       end
-    
-      opts.on('--encoding STR', 'Encodings to use for fuzzing wordlists (default url, optional b64,hex)') do |o|
-        options[:fuzz_encoding] = o.split(',').inject({}) do |r,e|
-          r[e.downcase.strip.to_sym] = true; r
-        end
-      end
   
       opts.on('-v', '--verbose NUM', 'Enabled verbose output, from 0 (fail) to 4 (trace), default 2 (info)') do |v|
         options[:verbose] = v.to_i

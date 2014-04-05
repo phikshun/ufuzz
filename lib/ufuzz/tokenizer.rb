@@ -42,10 +42,7 @@ class Tokenizer
   end
   
   def fuzz_positions(tok, i, fuzz, opts)
-    encoder = [ proc { |a| a.to_s } ]
-    encoder += opts[:encoder] if opts[:encoder]
-      
-    encoder.each do |encode|
+    Config.instance.encoders.each do |encode|
       fuzz_val = encode.call(fuzz)
       ["#{fuzz_val}", "#{tok}#{fuzz_val}", "#{fuzz_val}#{tok}"].each do |f|
         t    = @tokens.dup

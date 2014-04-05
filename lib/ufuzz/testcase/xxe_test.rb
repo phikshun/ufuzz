@@ -14,7 +14,7 @@ class XxeTest < TestCase
   end
   
   def test(content)
-    [/xterm/, /root:/].each do |regex|
+    Config.instance.traversal_match.each do |regex|
       if content.to_s =~ regex
         return Fault.new('xml external entity injection', "possible xxe injection - #{@current.inspect}: found #{regex.inspect}")
       end

@@ -15,7 +15,7 @@ class SqliTest < TestCase
 
   def test(content)
     delay = Time.now.to_f - @time
-    if delay >= 5
+    if delay >= Config.instance.detect_delay
       Fault.new('sql injection', "possible sql injection - #{@current.inspect}: delay #{delay}")
     else
       nil

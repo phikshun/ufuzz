@@ -4,7 +4,9 @@ class GenericConfig < UFuzz::Config
       platform:     'Generic',
       use_ssl:      false,
       use_session:  false,
-      #skip_urls:    /firmwareupdate1|UpdateWeeklyCalendar/, 
+      encoders:     [ proc { |f| f.to_s } ],
+      #skip_urls:   /firmwareupdate1|UpdateWeeklyCalendar|ChangeFriendlyName/,
+      #delay:       1, 
     }
   end
 end

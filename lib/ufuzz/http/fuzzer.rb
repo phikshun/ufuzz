@@ -73,13 +73,13 @@ class Fuzzer < UFuzz::Fuzzer
   end
   
   def header_fuzzer
-    headers = partial_http_request_headers.merge(@request.headers)
+    headers = @config.fuzzable_headers.merge(@request.headers)
     headers = headers.merge({ 'User-Agent' => 'Mozilla/5.0' }) # speed fix
     
-    partial_http_request_headers.each_key do |header|
+    @config.fuzzable_headers.each_key do |header|
       value = headers[header]
       t = Tokenizer.new(value)
-      t.fuzz_each_token(testcase, encoder: [ proc { |f| f.to_s.urlenc } ]) do |fuzz_header, i, fuzz|
+      t.fuzz_each_token(testcase) do |fuzz_header, i, fuzz|
         req = Request.new(@request.to_s)
         req.set_header(header, fuzz_header)
         do_fuzz_case(req, i, fuzz)
@@ -95,27 +95,10 @@ class Fuzzer < UFuzz::Fuzzer
     end
   end
   
-  def default_fuzz_headers
-    {
-      'Cookie' => 'A=1',
-      'Referer' => 'http://www.example.com',
-      'User-Agent' => 'Mozilla/5.0',
-    }
-  end
-  
-  def partial_http_request_headers
-    {
-      'Host'   => 'localhost',
-      'Cookie' => '0',
-      'User-Agent' => 'Mozilla',
-      'Referer' => 'localhost'
-    }
-  end
-  
   def param_fuzzer
     @request.url_variables.each_pair do |k,v|
       t = Tokenizer.new(v)
-      t.fuzz_each_token(testcase, encoder: [ proc { |f| f.to_s.urlenc } ]) do |fuzz_param, i, fuzz|
+      t.fuzz_each_token(testcase) do |fuzz_param, i, fuzz|
         req = Request.new(@request.to_s)
         req.query_string = @request.url_variables.merge({k => fuzz_param})
         do_fuzz_case(req, i, fuzz)
@@ -125,33 +108,37 @@ class Fuzzer < UFuzz::Fuzzer
     @request.url_variables.each_pair do |k,v|
       testcase.rewind
       while(testcase.next?)
-        req = Request.new(@request.to_s)
         fuzz = testcase.next
-        req.query_string = @request.url_variables.merge({k => fuzz.to_s.urlenc})
-        do_fuzz_case(req, req.first_line.index(fuzz.to_s.urlenc), fuzz)
+        @config.encoders.each do |encoder|
+          encoded_fuzz = encoder.call(fuzz)
+          req = Request.new(@request.to_s)
+          req.query_string = @request.url_variables.merge({k => encoded_fuzz})
+          do_fuzz_case(req, req.first_line.index(encoded_fuzz), fuzz)
+        end
       end
     end
     
-    extra_param.each_pair do |k,v|
-      t = Tokenizer.new(v)
-      t.fuzz_each_token(testcase, encoder: [ proc { |f| f.to_s.urlenc } ]) do |fuzz_param, i, fuzz|
-        req = Request.new(@request.to_s)
-        req.query_string = @request.url_variables.merge({k => fuzz_param})
-        do_fuzz_case(req, i, fuzz)
+    if @config.extra_param
+      @config.extra_param.each_pair do |k,v|
+        t = Tokenizer.new(v)
+        t.fuzz_each_token(testcase) do |fuzz_param, i, fuzz|
+          req = Request.new(@request.to_s)
+          req.query_string = @request.url_variables.merge({k => fuzz_param})
+          do_fuzz_case(req, i, fuzz)
+        end
       end
     end
     
     testcase.rewind
     while(testcase.next?)
-      req = Request.new(@request.to_s)
       fuzz = testcase.next
-      req.query_string = @request.url_variables.merge({fuzz.to_s.urlenc => '1'})
-      do_fuzz_case(req, req.first_line.index(fuzz.to_s.urlenc), fuzz)
+      @config.encoders.each do |encoder|
+        encoded_fuzz = encoder.call(fuzz)
+        req = Request.new(@request.to_s)
+        req.query_string = @request.url_variables.merge({encoded_fuzz => '1'})
+        do_fuzz_case(req, req.first_line.index(encoded_fuzz), fuzz)
+      end
     end
-  end
-  
-  def extra_param
-    {'t' => '1'}
   end
   
   def post_fuzzer
@@ -165,9 +152,9 @@ class Fuzzer < UFuzz::Fuzzer
         end
       else
         @request.body_variables.each_pair do |k,v|
-          #next if @config.csrf_token_regex && k =~ @config.csrf_token_regex
+          next if @config.csrf_token_regex && k =~ @config.csrf_token_regex
           t = Tokenizer.new(v)
-          t.fuzz_each_token(testcase, encoder: [ proc { |f| f.to_s.urlenc } ]) do |fuzz_var, i, fuzz|
+          t.fuzz_each_token(testcase) do |fuzz_var, i, fuzz|
             req = Request.new(@request.to_s)
             req.body = req.body_variables.merge({k => fuzz_var})
             do_fuzz_case(req, i, fuzz)
@@ -177,19 +164,25 @@ class Fuzzer < UFuzz::Fuzzer
         @request.body_variables.each_pair do |k,v|
           testcase.rewind
           while(testcase.next?)
-            req = Request.new(@request.to_s)
             fuzz = testcase.next
-            req.body = @request.body_variables.merge({k => fuzz.to_s.urlenc})
-            do_fuzz_case(req, req.first_line.index(fuzz.to_s.urlenc), fuzz)
+            @config.encoders.each do |encoder|
+              encoded_fuzz = encoder.call(fuzz)
+              req = Request.new(@request.to_s)
+              req.body = @request.body_variables.merge({k => encoded_fuzz})
+              do_fuzz_case(req, req.first_line.index(encoded_fuzz), fuzz)
+            end
           end
         end
       
         testcase.rewind
         while(testcase.next?)
-          req  = Request.new(@request.to_s)
           fuzz = testcase.next
-          req.body = req.body_variables.merge({fuzz.to_s.urlenc => '1'})
-          do_fuzz_case(req, req.body.index(fuzz.to_s.urlenc), fuzz)
+          @config.encoders.each do |encoder|
+            encoded_fuzz = encoder.call(fuzz)
+            req = Request.new(@request.to_s)
+            req.body = req.body_variables.merge({encoded_fuzz => '1'})
+            do_fuzz_case(req, req.body.index(encoded_fuzz), fuzz)
+          end
         end
       end
     end
@@ -206,7 +199,7 @@ class Fuzzer < UFuzz::Fuzzer
   
   def token_fuzzer
     t = Tokenizer.new(request.to_s)
-    t.fuzz_each_token(testcase, encoder: [ proc { |f| f.to_s.urlenc } ]) do |r, i, f|
+    t.fuzz_each_token(testcase) do |r, i, f|
       do_fuzz_case(Request.new(r).update_content_length, i, f)
     end
   end
