@@ -1,4 +1,4 @@
-![UFuzz](http://pulpphikshun.files.wordpress.com/2014/04/ufuzzlogo.png)
+![UFuzz](http://pulpphikshun.files.wordpress.com/2014/04/ufuzzlogo.png?w=300&h=150)
 ==
 
 UFuzz, or Universal Plug and Fuzz, is an automatic UPnP fuzzing tool. It will enumerate all UPnP endpoints on the network, find the available services and fuzz them. It also has the capability to fuzz HTTP using Burp proxy logs.
