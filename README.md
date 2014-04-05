@@ -17,6 +17,11 @@ Finally, some of the code was borrowed from other projects:
 
 * The socket and http parsing code is based on [Excon](https://github.com/geemus/excon).
 
+Installation
+----
+
+UFuzz has been tested with Ruby 1.9.3 and Ruby 2.1.1. You can install all the required gems by running `bundle install` in the UFuzz directory.
+
 Usage
 ----
 
