@@ -20,7 +20,7 @@ Finally, some of the code was borrowed from other projects:
 Installation
 ----
 
-UFuzz has been tested with Ruby 1.9.3 and Ruby 2.1.1. You can install all the required gems by running `bundle install` in the UFuzz directory.
+UFuzz has been tested with Ruby 2.5.3. You can install all the required gems by running `bundle install` in the UFuzz directory.
 
 Usage
 ----

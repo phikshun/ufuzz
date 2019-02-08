@@ -70,7 +70,7 @@ module Options
       end
     end
 
-    optparse.parse!(cmd_line)
+    optparse.parse!
     options[:module] ||= 'generic' 
     options
   end

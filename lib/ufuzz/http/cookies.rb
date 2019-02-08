@@ -69,10 +69,12 @@ class CookieJar
   end
   
   def parse_from_req(req)
-    req.match(/Cookie: ([^\r\n]+)/) do |m|
-      cookie_header = m[1]
-      cookie_header.split(/[;,]\s?/).each do |c|
-        update_cookie_raw(c)
+    unless req.nil? or
+      req.match(/Cookie: ([^\r\n]+)/) do |m|
+        cookie_header = m[1]
+        cookie_header.split(/[;,]\s?/).each do |c|
+          update_cookie_raw(c)
+        end
       end
     end
   end
